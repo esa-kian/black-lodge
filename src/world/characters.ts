@@ -258,7 +258,7 @@ function addOutfitDetails(
     addPixel(group, 0x050506, [0.22, 0.16, 0.08], [0.24, 0.16, 0.34], 0.72)
   }
 
-  if (style === 'oneArmedMan' || style === 'giant' || style === 'cooper') {
+  if (style === 'oneArmedMan' || style === 'cooper') {
     const shirt = new THREE.Mesh(
       new THREE.BoxGeometry(0.34, 0.82, 0.045),
       makeMaterial(0xe9ded0, 0.5)
@@ -267,7 +267,7 @@ function addOutfitDetails(
     shirt.position.set(0, 1.55, 0.35)
 
     const tie = new THREE.Mesh(
-      new THREE.BoxGeometry(0.08, style === 'giant' ? 0.92 : 0.72, 0.055),
+      new THREE.BoxGeometry(0.08, 0.72, 0.055),
       makeMaterial(style === 'oneArmedMan' ? 0x5a1111 : 0x080808, 0.65)
     )
 
@@ -277,6 +277,48 @@ function addOutfitDetails(
 
     for (const y of [1.78, 1.58, 1.38]) {
       addPixel(group, 0xf6f0e6, [0, y, 0.42], [0.04, 0.04, 0.025], 0.45)
+    }
+  }
+
+  if (style === 'giant') {
+    const shirtPanel = new THREE.Mesh(
+      new THREE.BoxGeometry(0.56, 0.92, 0.055),
+      makeMaterial(0x8d8a84, 0.62)
+    )
+
+    shirtPanel.position.set(0, 1.54, 0.36)
+
+    const collarLeft = new THREE.Mesh(
+      new THREE.BoxGeometry(0.16, 0.08, 0.05),
+      makeMaterial(0xc8c3ba, 0.55)
+    )
+    const collarRight = collarLeft.clone()
+
+    collarLeft.position.set(-0.1, 1.99, 0.4)
+    collarLeft.rotation.z = -0.18
+    collarRight.position.set(0.1, 1.99, 0.4)
+    collarRight.rotation.z = 0.18
+
+    const bowLeft = new THREE.Mesh(
+      new THREE.BoxGeometry(0.14, 0.1, 0.055),
+      makeMaterial(0x11100f, 0.64)
+    )
+    const bowRight = bowLeft.clone()
+    const knot = new THREE.Mesh(
+      new THREE.BoxGeometry(0.06, 0.08, 0.06),
+      makeMaterial(0x050505, 0.55)
+    )
+
+    bowLeft.position.set(-0.08, 1.9, 0.42)
+    bowLeft.rotation.z = 0.18
+    bowRight.position.set(0.08, 1.9, 0.42)
+    bowRight.rotation.z = -0.18
+    knot.position.set(0, 1.9, 0.43)
+
+    group.add(shirtPanel, collarLeft, collarRight, bowLeft, bowRight, knot)
+
+    for (const y of [1.72, 1.5, 1.28]) {
+      addPixel(group, 0x2f2d2a, [0, y, 0.43], [0.05, 0.05, 0.025], 0.5)
     }
   }
 
@@ -547,7 +589,7 @@ export function createCharacters(scene: THREE.Scene) {
     }),
     createCharacter({
       name: 'Giant',
-      bodyColor: 0x15110f,
+      bodyColor: 0x77736c,
       skinColor: 0xe2c4a8,
       style: 'giant',
       scale: 1.85,

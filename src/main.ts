@@ -1,0 +1,6 @@
+import './styles/style.css'
+import { Game } from './core/game'
+
+const game = new Game()
+
+game.start()

@@ -1,6 +1,6 @@
 import * as THREE from 'three'
 
-const CURTAIN_HEIGHT = 80
+const CURTAIN_HEIGHT = 900
 
 function createCurtainTexture() {
   const canvas = document.createElement('canvas')

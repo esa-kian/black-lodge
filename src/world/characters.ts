@@ -1,4 +1,7 @@
 import * as THREE from 'three'
+import armVoice from '../assets/arm.wav'
+import lauraVoice from '../assets/laura.wav'
+import oneArmedManVoice from '../assets/one_armed_man.wav'
 
 type CharacterConfig = {
   name: string
@@ -12,6 +15,7 @@ type CharacterConfig = {
   speed: number
   phase?: number
   glow?: number
+  audioSrc?: string
 }
 
 type CharacterActor = {
@@ -23,6 +27,10 @@ type CharacterActor = {
   path: THREE.Vector3[]
   speed: number
   phase: number
+  audio?: HTMLAudioElement
+  audioRadius: number
+  stopRadius: number
+  wasNearAudio: boolean
 }
 
 function makeMaterial(
@@ -485,6 +493,15 @@ function createCharacter(config: CharacterConfig) {
   group.scale.setScalar(scale)
   group.position.copy(config.path[0])
 
+  const audio = config.audioSrc === undefined
+    ? undefined
+    : new Audio(config.audioSrc)
+
+  if (audio) {
+    audio.preload = 'auto'
+    audio.volume = 0.85
+  }
+
   return {
     group,
     leftLeg,
@@ -493,7 +510,11 @@ function createCharacter(config: CharacterConfig) {
     rightArm,
     path: config.path,
     speed: config.speed,
-    phase: config.phase ?? 0
+    phase: config.phase ?? 0,
+    audio,
+    audioRadius: 7,
+    stopRadius: 5.5,
+    wasNearAudio: false
   }
 }
 
@@ -549,6 +570,46 @@ function moveAlongPath(
   actor.group.position.y = Math.abs(Math.sin(time * actor.speed * 4 + actor.phase)) * 0.04
 }
 
+function faceListener(
+  actor: CharacterActor,
+  listenerPosition: THREE.Vector3
+) {
+  const direction = listenerPosition.clone().sub(actor.group.position)
+
+  actor.group.rotation.y = Math.atan2(direction.x, direction.z)
+  actor.leftLeg.rotation.x = 0
+  actor.rightLeg.rotation.x = 0
+  actor.rightArm.rotation.x = 0
+
+  if (actor.leftArm) {
+    actor.leftArm.rotation.x = 0
+  }
+}
+
+function updateProximityAudio(
+  actor: CharacterActor,
+  listenerPosition: THREE.Vector3
+) {
+  if (!actor.audio) return
+
+  const distance = actor.group.position.distanceTo(listenerPosition)
+  const isNear = distance < actor.audioRadius
+
+  if (isNear && !actor.wasNearAudio) {
+    actor.audio.currentTime = 0
+    actor.audio.play().catch(() => {
+      actor.wasNearAudio = false
+    })
+  }
+
+  if (!isNear && distance > actor.audioRadius * 1.45) {
+    actor.wasNearAudio = false
+    return
+  }
+
+  actor.wasNearAudio = actor.wasNearAudio || isNear
+}
+
 export function createCharacters(scene: THREE.Scene) {
   const actors = [
     createCharacter({
@@ -567,7 +628,8 @@ export function createCharacters(scene: THREE.Scene) {
       ],
       speed: 1.2,
       phase: 2,
-      glow: 0xffdfb0
+      glow: 0xffdfb0,
+      audioSrc: lauraVoice
     }),
     createCharacter({
       name: 'One Armed Man',
@@ -585,7 +647,8 @@ export function createCharacters(scene: THREE.Scene) {
         lodgePoint(-6, -7)
       ],
       speed: 0.95,
-      phase: 9
+      phase: 9,
+      audioSrc: oneArmedManVoice
     }),
     createCharacter({
       name: 'Giant',
@@ -621,7 +684,8 @@ export function createCharacters(scene: THREE.Scene) {
       ],
       speed: 1.65,
       phase: 13,
-      glow: 0xff2c20
+      glow: 0xff2c20,
+      audioSrc: armVoice
     }),
     createCharacter({
       name: 'Dale Cooper',
@@ -649,9 +713,20 @@ export function createCharacters(scene: THREE.Scene) {
     scene.add(actor.group)
   }
 
-  return (time: number) => {
+  return (
+    time: number,
+    listenerPosition: THREE.Vector3
+  ) => {
     for (const actor of actors) {
-      moveAlongPath(actor, time)
+      const distance = actor.group.position.distanceTo(listenerPosition)
+
+      if (distance < actor.stopRadius) {
+        faceListener(actor, listenerPosition)
+      } else {
+        moveAlongPath(actor, time)
+      }
+
+      updateProximityAudio(actor, listenerPosition)
     }
   }
 }

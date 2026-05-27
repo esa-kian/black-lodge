@@ -6,6 +6,7 @@ import { createScene } from './scene'
 
 import { PlayerControls } from '../systems/controls'
 import { setupLighting } from '../systems/lighting'
+import backgroundMusic from '../assets/background.mp3'
 
 import { createBlackLodge } from '../world/blackLodge'
 
@@ -15,6 +16,7 @@ export class Game {
   scene
   controls
   updateWorld
+  backgroundAudio
 
   clock = new THREE.Clock()
 
@@ -33,6 +35,16 @@ export class Game {
     setupLighting(this.scene)
 
     this.updateWorld = createBlackLodge(this.scene)
+    this.backgroundAudio = new Audio(backgroundMusic)
+    this.backgroundAudio.loop = true
+    this.backgroundAudio.volume = 0.16
+
+    const startAudio = () => {
+      this.backgroundAudio.play().catch(() => {})
+    }
+
+    window.addEventListener('pointerdown', startAudio, { once: true })
+    window.addEventListener('keydown', startAudio, { once: true })
 
     window.addEventListener(
       'resize',
@@ -63,7 +75,7 @@ export class Game {
     const elapsed = this.clock.getElapsedTime()
 
     this.controls.update(delta)
-    this.updateWorld(elapsed)
+    this.updateWorld(elapsed, this.camera.position)
 
     this.renderer.render(
       this.scene,

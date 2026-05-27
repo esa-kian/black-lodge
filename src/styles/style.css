@@ -11,3 +11,55 @@ body,
 canvas {
   display: block;
 }
+
+.mobile-controls {
+  display: none;
+}
+
+@media (hover: none), (pointer: coarse) {
+  .mobile-controls {
+    position: fixed;
+    inset: 0;
+    z-index: 5;
+    display: block;
+    pointer-events: none;
+    touch-action: none;
+  }
+
+  .mobile-move-pad,
+  .mobile-look-pad {
+    position: absolute;
+    pointer-events: auto;
+    touch-action: none;
+  }
+
+  .mobile-move-pad {
+    left: 24px;
+    bottom: 28px;
+    width: 132px;
+    height: 132px;
+    border: 1px solid rgba(255, 230, 210, 0.24);
+    border-radius: 50%;
+    background: rgba(20, 4, 4, 0.34);
+    box-shadow: inset 0 0 22px rgba(255, 40, 40, 0.12);
+  }
+
+  .mobile-move-knob {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 54px;
+    height: 54px;
+    border: 1px solid rgba(255, 230, 210, 0.34);
+    border-radius: 50%;
+    background: rgba(145, 12, 18, 0.66);
+    transform: translate(-50%, -50%);
+  }
+
+  .mobile-look-pad {
+    right: 0;
+    top: 0;
+    width: 58vw;
+    height: 100vh;
+  }
+}

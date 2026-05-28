@@ -152,7 +152,6 @@ function createFloorLamp(x: number, z: number) {
   const bulb = new THREE.PointLight(0xffba76, 22, 12)
 
   bulb.position.y = 2.7
-  bulb.castShadow = true
 
   lamp.add(base, pole, shade, bulb)
   lamp.position.set(x, 0, z)

@@ -175,7 +175,8 @@ function addCeilingDrape(
 function addMazeLamp(
   scene: THREE.Scene,
   x: number,
-  z: number
+  z: number,
+  addDynamicLight: boolean
 ) {
   const group = new THREE.Group()
   const brass = new THREE.MeshStandardMaterial({
@@ -211,11 +212,14 @@ function addMazeLamp(
 
   lampShade.position.y = 2.32
 
-  const glow = new THREE.PointLight(0xff9f56, 18, 14)
+  if (addDynamicLight) {
+    const glow = new THREE.PointLight(0xff9f56, 14, 11)
 
-  glow.position.y = 2.25
+    glow.position.y = 2.25
+    group.add(glow)
+  }
 
-  group.add(base, pole, lampShade, glow)
+  group.add(base, pole, lampShade)
   group.position.set(x, 0, z)
 
   group.traverse((obj) => {
@@ -231,7 +235,8 @@ function addMazeLamp(
 function addPortal(
   scene: THREE.Scene,
   x: number,
-  z: number
+  z: number,
+  addDynamicLight: boolean
 ) {
   const ringMaterial = new THREE.MeshStandardMaterial({
     color: 0x140404,
@@ -267,15 +272,15 @@ function addPortal(
 
   arch.add(left, right, top, panel)
   arch.position.set(x, 0, z)
-  arch.castShadow = true
-
   scene.add(arch)
 
-  const glow = new THREE.PointLight(0xd01010, 14, 14)
+  if (addDynamicLight) {
+    const glow = new THREE.PointLight(0xd01010, 10, 10)
 
-  glow.position.set(x, 2.4, z + 0.8)
+    glow.position.set(x, 2.4, z + 0.8)
 
-  scene.add(glow)
+    scene.add(glow)
+  }
 }
 
 function addCoffeeTable(
@@ -373,6 +378,9 @@ function addShadowMannequin(
 }
 
 export function createMaze(scene: THREE.Scene) {
+  let lampLightCount = 0
+  let portalLightCount = 0
+
   for (const cell of MAZE) {
     const world = cellToWorld(cell.x, cell.z)
 
@@ -385,11 +393,23 @@ export function createMaze(scene: THREE.Scene) {
     }
 
     if (cell.lamp) {
-      addMazeLamp(scene, world.x + 2.8, world.z + 2.5)
+      const addDynamicLight = lampLightCount < 4
+
+      addMazeLamp(scene, world.x + 2.8, world.z + 2.5, addDynamicLight)
+
+      if (addDynamicLight) {
+        lampLightCount += 1
+      }
     }
 
     if (cell.portal) {
-      addPortal(scene, world.x, world.z - 3.75)
+      const addDynamicLight = portalLightCount < 2
+
+      addPortal(scene, world.x, world.z - 3.75, addDynamicLight)
+
+      if (addDynamicLight) {
+        portalLightCount += 1
+      }
     }
 
     if (cell.room) {

@@ -1,7 +1,9 @@
 import * as THREE from 'three'
-import armVoice from '../assets/arm.wav'
-import lauraVoice from '../assets/laura.wav'
-import oneArmedManVoice from '../assets/one_armed_man.wav'
+import armVoice from '../assets/arm.mp3'
+import cooperVoice from '../assets/cooper.mp3'
+import giantVoice from '../assets/giant.mp3'
+import lauraVoice from '../assets/laura.mp3'
+import oneArmedManVoice from '../assets/one_armed_man.mp3'
 
 type CharacterConfig = {
   name: string
@@ -602,7 +604,9 @@ function updateProximityAudio(
     })
   }
 
-  if (!isNear && distance > actor.audioRadius * 1.45) {
+  if (!isNear) {
+    actor.audio.pause()
+    actor.audio.currentTime = 0
     actor.wasNearAudio = false
     return
   }
@@ -666,7 +670,8 @@ export function createCharacters(scene: THREE.Scene) {
       ],
       speed: 0.62,
       phase: 4,
-      glow: 0xe8cfae
+      glow: 0xe8cfae,
+      audioSrc: giantVoice
     }),
     createCharacter({
       name: 'The Arm',
@@ -705,7 +710,8 @@ export function createCharacters(scene: THREE.Scene) {
       ],
       speed: 1.05,
       phase: 6,
-      glow: 0xffd6a4
+      glow: 0xffd6a4,
+      audioSrc: cooperVoice
     })
   ]
 

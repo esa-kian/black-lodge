@@ -9,8 +9,6 @@ export function setupLighting(scene: THREE.Scene) {
 
   overheadLight.position.set(0, 7, 0)
 
-  overheadLight.castShadow = true
-
   scene.add(overheadLight)
 
   const frontLight = new THREE.PointLight(0xffb08a, 35, 30)

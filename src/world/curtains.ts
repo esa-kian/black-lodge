@@ -1,8 +1,15 @@
 import * as THREE from 'three'
 
-const CURTAIN_HEIGHT = 900
+const CURTAIN_HEIGHT = 10
+const curtainGeometryByWidth = new Map<number, THREE.PlaneGeometry>()
+
+let curtainTexture: THREE.CanvasTexture | undefined
+let curtainMaterial: THREE.MeshStandardMaterial | undefined
+let rodMaterial: THREE.MeshStandardMaterial | undefined
 
 function createCurtainTexture() {
+  if (curtainTexture) return curtainTexture
+
   const canvas = document.createElement('canvas')
 
   canvas.width = 256
@@ -34,13 +41,40 @@ function createCurtainTexture() {
     ctx.fillRect(0, y, canvas.width, 2)
   }
 
-  const texture = new THREE.CanvasTexture(canvas)
+  curtainTexture = new THREE.CanvasTexture(canvas)
 
-  texture.wrapS = THREE.RepeatWrapping
-  texture.wrapT = THREE.RepeatWrapping
-  texture.repeat.set(2.8, 1)
+  curtainTexture.wrapS = THREE.RepeatWrapping
+  curtainTexture.wrapT = THREE.RepeatWrapping
+  curtainTexture.repeat.set(2.8, 1)
 
-  return texture
+  return curtainTexture
+}
+
+function getCurtainMaterial() {
+  if (!curtainMaterial) {
+    curtainMaterial = new THREE.MeshStandardMaterial({
+      color: 0xbc171b,
+      map: createCurtainTexture(),
+      emissive: 0x230000,
+      emissiveIntensity: 0.18,
+      roughness: 0.82,
+      metalness: 0.02,
+      side: THREE.DoubleSide
+    })
+  }
+
+  return curtainMaterial
+}
+
+function getRodMaterial() {
+  if (!rodMaterial) {
+    rodMaterial = new THREE.MeshStandardMaterial({
+      color: 0x1b0505,
+      roughness: 0.5
+    })
+  }
+
+  return rodMaterial
 }
 
 function createCurtainPanel(
@@ -48,6 +82,10 @@ function createCurtainPanel(
   height: number,
   folds: number
 ) {
+  const cachedGeometry = curtainGeometryByWidth.get(width)
+
+  if (cachedGeometry) return cachedGeometry
+
   const geometry = new THREE.PlaneGeometry(width, height, folds * 8, 1)
   const position = geometry.attributes.position
 
@@ -62,6 +100,8 @@ function createCurtainPanel(
   position.needsUpdate = true
   geometry.computeVertexNormals()
 
+  curtainGeometryByWidth.set(width, geometry)
+
   return geometry
 }
 
@@ -71,15 +111,7 @@ export function addCurtainWall(
   position: THREE.Vector3,
   rotationY = 0
 ) {
-  const material = new THREE.MeshStandardMaterial({
-    color: 0xbc171b,
-    map: createCurtainTexture(),
-    emissive: 0x230000,
-    emissiveIntensity: 0.18,
-    roughness: 0.82,
-    metalness: 0.02,
-    side: THREE.DoubleSide
-  })
+  const material = getCurtainMaterial()
 
   const curtain = new THREE.Mesh(
     createCurtainPanel(width, CURTAIN_HEIGHT, Math.max(5, Math.floor(width / 2))),
@@ -95,18 +127,13 @@ export function addCurtainWall(
 
   const rod = new THREE.Mesh(
     new THREE.CylinderGeometry(0.08, 0.08, width + 0.8, 24),
-    new THREE.MeshStandardMaterial({
-      color: 0x1b0505,
-      roughness: 0.5
-    })
+    getRodMaterial()
   )
 
   rod.position.copy(position)
   rod.position.y = CURTAIN_HEIGHT + 0.15
   rod.rotation.z = Math.PI / 2
   rod.rotation.y = rotationY
-  rod.castShadow = true
-
   scene.add(rod)
 
   const valance = new THREE.Mesh(
@@ -117,7 +144,6 @@ export function addCurtainWall(
   valance.position.copy(position)
   valance.position.y = CURTAIN_HEIGHT - 0.25
   valance.rotation.y = rotationY
-  valance.castShadow = true
 
   scene.add(valance)
 }

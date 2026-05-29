@@ -6,6 +6,7 @@ import lauraVoice from '../assets/laura.mp3'
 import oneArmedManVoice from '../assets/one_armed_man.mp3'
 
 type CharacterConfig = {
+  id: string
   name: string
   bodyColor: number
   hairColor?: number
@@ -33,6 +34,19 @@ type CharacterActor = {
   audioRadius: number
   stopRadius: number
   wasNearAudio: boolean
+  hasCompletedAudio: boolean
+  id: string
+}
+
+export type CharacterSystem = {
+  update: (
+    time: number,
+    listenerPosition: THREE.Vector3
+  ) => void
+  getCharacters: () => Array<{
+    id: string
+    position: THREE.Vector3
+  }>
 }
 
 function makeMaterial(
@@ -208,6 +222,21 @@ function addHairDetails(
 
     darkHair.position.set(0, 2.48, -0.02)
     group.add(darkHair)
+  }
+
+  if (style === 'arm') {
+    const top = new THREE.Mesh(
+      new THREE.BoxGeometry(0.54, 0.16, 0.5),
+      hairMaterial
+    )
+    const front = new THREE.Mesh(
+      new THREE.BoxGeometry(0.46, 0.18, 0.1),
+      hairMaterial
+    )
+
+    top.position.set(0, 2.5, -0.02)
+    front.position.set(0, 2.42, 0.25)
+    group.add(top, front)
   }
 
   if (style === 'cooper') {
@@ -516,7 +545,9 @@ function createCharacter(config: CharacterConfig) {
     audio,
     audioRadius: 7,
     stopRadius: 5.5,
-    wasNearAudio: false
+    wasNearAudio: false,
+    hasCompletedAudio: false,
+    id: config.id
   }
 }
 
@@ -590,7 +621,8 @@ function faceListener(
 
 function updateProximityAudio(
   actor: CharacterActor,
-  listenerPosition: THREE.Vector3
+  listenerPosition: THREE.Vector3,
+  onAudioComplete?: (id: string) => void
 ) {
   if (!actor.audio) return
 
@@ -599,6 +631,7 @@ function updateProximityAudio(
 
   if (isNear && !actor.wasNearAudio) {
     actor.audio.currentTime = 0
+    actor.hasCompletedAudio = false
     actor.audio.play().catch(() => {
       actor.wasNearAudio = false
     })
@@ -611,12 +644,25 @@ function updateProximityAudio(
     return
   }
 
+  if (
+    isNear &&
+    actor.audio.ended &&
+    !actor.hasCompletedAudio
+  ) {
+    actor.hasCompletedAudio = true
+    onAudioComplete?.(actor.id)
+  }
+
   actor.wasNearAudio = actor.wasNearAudio || isNear
 }
 
-export function createCharacters(scene: THREE.Scene) {
+export function createCharacters(
+  scene: THREE.Scene,
+  onAudioComplete?: (id: string) => void
+): CharacterSystem {
   const actors = [
     createCharacter({
+      id: 'laura',
       name: 'Laura',
       bodyColor: 0x050506,
       hairColor: 0xf2d18a,
@@ -636,6 +682,7 @@ export function createCharacters(scene: THREE.Scene) {
       audioSrc: lauraVoice
     }),
     createCharacter({
+      id: 'oneArmedMan',
       name: 'One Armed Man',
       bodyColor: 0x2f2b24,
       hairColor: 0x21110b,
@@ -655,6 +702,7 @@ export function createCharacters(scene: THREE.Scene) {
       audioSrc: oneArmedManVoice
     }),
     createCharacter({
+      id: 'giant',
       name: 'Giant',
       bodyColor: 0x77736c,
       skinColor: 0xe2c4a8,
@@ -674,8 +722,10 @@ export function createCharacters(scene: THREE.Scene) {
       audioSrc: giantVoice
     }),
     createCharacter({
+      id: 'arm',
       name: 'The Arm',
       bodyColor: 0xb90e12,
+      hairColor: 0xe6c475,
       skinColor: 0xf0bf9c,
       style: 'arm',
       scale: 0.5,
@@ -693,6 +743,7 @@ export function createCharacters(scene: THREE.Scene) {
       audioSrc: armVoice
     }),
     createCharacter({
+      id: 'cooper',
       name: 'Dale Cooper',
       bodyColor: 0x0a0a0c,
       hairColor: 0x12100f,
@@ -719,20 +770,26 @@ export function createCharacters(scene: THREE.Scene) {
     scene.add(actor.group)
   }
 
-  return (
-    time: number,
-    listenerPosition: THREE.Vector3
-  ) => {
-    for (const actor of actors) {
-      const distance = actor.group.position.distanceTo(listenerPosition)
+  return {
+    update: (
+      time: number,
+      listenerPosition: THREE.Vector3
+    ) => {
+      for (const actor of actors) {
+        const distance = actor.group.position.distanceTo(listenerPosition)
 
-      if (distance < actor.stopRadius) {
-        faceListener(actor, listenerPosition)
-      } else {
-        moveAlongPath(actor, time)
+        if (distance < actor.stopRadius) {
+          faceListener(actor, listenerPosition)
+        } else {
+          moveAlongPath(actor, time)
+        }
+
+        updateProximityAudio(actor, listenerPosition, onAudioComplete)
       }
-
-      updateProximityAudio(actor, listenerPosition)
-    }
+    },
+    getCharacters: () => actors.map((actor) => ({
+      id: actor.id,
+      position: actor.group.position
+    }))
   }
 }

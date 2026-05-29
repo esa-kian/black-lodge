@@ -12,8 +12,10 @@ export class PlayerControls {
   moveBackward = false
   moveLeft = false
   moveRight = false
+  isRunning = false
 
   speed = 8
+  runMultiplier = 1.8
   touchMoveX = 0
   touchMoveZ = 0
   lookPointerId: number | null = null
@@ -59,6 +61,10 @@ export class PlayerControls {
       case 'KeyD':
         this.moveRight = true
         break
+      case 'ShiftLeft':
+      case 'ShiftRight':
+        this.isRunning = true
+        break
     }
   }
 
@@ -76,6 +82,10 @@ export class PlayerControls {
       case 'KeyD':
         this.moveRight = false
         break
+      case 'ShiftLeft':
+      case 'ShiftRight':
+        this.isRunning = false
+        break
     }
   }
 
@@ -91,8 +101,10 @@ export class PlayerControls {
 
     direction.normalize()
 
-    this.controls.moveRight(direction.x * this.speed * delta)
-    this.controls.moveForward(direction.z * this.speed * delta)
+    const speed = this.speed * (this.isRunning ? this.runMultiplier : 1)
+
+    this.controls.moveRight(direction.x * speed * delta)
+    this.controls.moveForward(direction.z * speed * delta)
   }
 
   createMobileControls() {

@@ -75,7 +75,7 @@ export class Game {
     const elapsed = this.clock.getElapsedTime()
 
     this.controls.update(delta)
-    this.updateWorld(elapsed, this.camera.position)
+    this.updateWorld(elapsed, this.camera.position, delta)
 
     this.renderer.render(
       this.scene,

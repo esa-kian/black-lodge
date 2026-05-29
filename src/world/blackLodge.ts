@@ -4,6 +4,7 @@ import { createCurtains } from './curtains'
 import { createFurniture } from './furniture'
 import { createMaze } from './maze'
 import { createCharacters } from './characters'
+import { createAdventure } from './adventure'
 
 export function createBlackLodge(scene: THREE.Scene) {
   const floor = createFloor()
@@ -13,7 +14,14 @@ export function createBlackLodge(scene: THREE.Scene) {
   createCurtains(scene)
   createFurniture(scene)
   createMaze(scene)
-  const updateCharacters = createCharacters(scene)
+  let adventure: ReturnType<typeof createAdventure>
+  const characters = createCharacters(scene, (id) => {
+    adventure.markCharacterHeard(id)
+  })
+
+  adventure = createAdventure(scene, {
+    getCharacters: characters.getCharacters
+  })
 
   const doorway = new THREE.Mesh(
     new THREE.BoxGeometry(3.2, 5.6, 0.18),
@@ -33,5 +41,12 @@ export function createBlackLodge(scene: THREE.Scene) {
 
   scene.add(doorwayGlow)
 
-  return updateCharacters
+  return (
+    time: number,
+    playerPosition: THREE.Vector3,
+    delta: number
+  ) => {
+    characters.update(time, playerPosition)
+    adventure.update(time, playerPosition, delta)
+  }
 }

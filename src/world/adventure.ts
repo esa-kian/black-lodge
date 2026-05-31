@@ -59,6 +59,10 @@ function createForest() {
   )
 
   floor.rotation.x = -Math.PI / 2
+  floor.position.y = 0.04
+  floor.material.polygonOffset = true
+  floor.material.polygonOffsetFactor = -1
+  floor.material.polygonOffsetUnits = -1
   group.add(floor)
 
   const trunkMaterial = makeMaterial(0x221109, 0.85)
@@ -98,45 +102,80 @@ function createForest() {
 
 function createBob() {
   const group = new THREE.Group()
-  const denim = makeMaterial(0x1a3556, 0.72)
-  const skin = makeMaterial(0xc8916c, 0.65)
-  const hair = makeMaterial(0x2a170d, 0.9)
+  const shirt = makeMaterial(0x101014, 0.78)
+  const skin = makeMaterial(0xd1845f, 0.62)
+  const hair = makeMaterial(0x9a9285, 0.9)
+  const dark = makeMaterial(0x070404, 0.7)
+  const teeth = makeMaterial(0xf2e6cf, 0.45)
 
   const body = new THREE.Mesh(
     new THREE.BoxGeometry(0.8, 1.25, 0.55),
-    denim
+    shirt
   )
   const head = new THREE.Mesh(
     new THREE.BoxGeometry(0.58, 0.58, 0.58),
     skin
   )
   const hairBack = new THREE.Mesh(
-    new THREE.BoxGeometry(0.72, 1.1, 0.18),
+    new THREE.BoxGeometry(0.72, 0.95, 0.18),
     hair
   )
+  const hairTop = new THREE.Mesh(
+    new THREE.BoxGeometry(0.68, 0.18, 0.58),
+    hair
+  )
+  const leftHair = new THREE.Mesh(
+    new THREE.BoxGeometry(0.16, 0.8, 0.18),
+    hair
+  )
+  const rightHair = leftHair.clone()
 
   body.position.y = 1.3
   head.position.y = 2.22
-  hairBack.position.set(0, 1.94, -0.34)
-  group.add(body, head, hairBack)
+  hairBack.position.set(0, 2.0, -0.34)
+  hairTop.position.set(0, 2.55, -0.04)
+  leftHair.position.set(-0.36, 2.12, -0.02)
+  rightHair.position.set(0.36, 2.12, -0.02)
+  group.add(body, head, hairBack, hairTop, leftHair, rightHair)
 
   for (const x of [-0.12, 0.12]) {
     const eye = new THREE.Mesh(
-      new THREE.BoxGeometry(0.06, 0.06, 0.02),
-      makeMaterial(0x070303, 0.5)
+      new THREE.BoxGeometry(0.07, 0.055, 0.02),
+      dark
+    )
+    const brow = new THREE.Mesh(
+      new THREE.BoxGeometry(0.14, 0.035, 0.025),
+      dark
     )
 
     eye.position.set(x, 2.28, 0.31)
-    group.add(eye)
+    brow.position.set(x, 2.39, 0.32)
+    brow.rotation.z = x < 0 ? -0.32 : 0.32
+    group.add(eye, brow)
   }
 
   const mouth = new THREE.Mesh(
-    new THREE.BoxGeometry(0.22, 0.04, 0.02),
-    makeMaterial(0x4d0505, 0.7)
+    new THREE.BoxGeometry(0.32, 0.12, 0.025),
+    makeMaterial(0x4d0505, 0.72)
+  )
+  const upperTeeth = new THREE.Mesh(
+    new THREE.BoxGeometry(0.28, 0.035, 0.03),
+    teeth
+  )
+  const lowerTeeth = new THREE.Mesh(
+    new THREE.BoxGeometry(0.22, 0.03, 0.03),
+    teeth
+  )
+  const nose = new THREE.Mesh(
+    new THREE.BoxGeometry(0.06, 0.1, 0.035),
+    makeMaterial(0xb86a4c, 0.62)
   )
 
-  mouth.position.set(0, 2.08, 0.31)
-  group.add(mouth)
+  mouth.position.set(0, 2.08, 0.32)
+  upperTeeth.position.set(0, 2.11, 0.34)
+  lowerTeeth.position.set(0, 2.05, 0.34)
+  nose.position.set(0, 2.21, 0.33)
+  group.add(mouth, upperTeeth, lowerTeeth, nose)
 
   group.position.set(126, 0, -98)
 
@@ -145,9 +184,11 @@ function createBob() {
 
 function createGordon() {
   const group = new THREE.Group()
-  const suit = makeMaterial(0x5e5a50, 0.72)
+  const suit = makeMaterial(0x080808, 0.72)
   const skin = makeMaterial(0xe1b08a, 0.62)
   const white = makeMaterial(0xf0eee5, 0.55)
+  const dark = makeMaterial(0x050505, 0.55)
+  const gold = makeMaterial(0xb8974a, 0.4, 0x5a3b0d, 0.16)
 
   const chair = new THREE.Mesh(
     new THREE.BoxGeometry(1.8, 0.7, 1.2),
@@ -157,25 +198,86 @@ function createGordon() {
     new THREE.BoxGeometry(0.8, 1.05, 0.55),
     suit
   )
+  const shirt = new THREE.Mesh(
+    new THREE.BoxGeometry(0.36, 0.76, 0.05),
+    makeMaterial(0xf2efe7, 0.5)
+  )
+  const tie = new THREE.Mesh(
+    new THREE.BoxGeometry(0.1, 0.7, 0.06),
+    dark
+  )
   const head = new THREE.Mesh(
     new THREE.BoxGeometry(0.58, 0.58, 0.58),
     skin
   )
   const hair = new THREE.Mesh(
-    new THREE.BoxGeometry(0.62, 0.18, 0.58),
+    new THREE.BoxGeometry(0.72, 0.24, 0.58),
+    white
+  )
+  const hairRise = new THREE.Mesh(
+    new THREE.BoxGeometry(0.56, 0.34, 0.34),
     white
   )
   const cup = new THREE.Mesh(
     new THREE.BoxGeometry(0.18, 0.2, 0.16),
     white
   )
+  const flagPin = new THREE.Mesh(
+    new THREE.BoxGeometry(0.16, 0.08, 0.035),
+    makeMaterial(0xc03030, 0.45, 0x401010, 0.1)
+  )
+  const badgePin = new THREE.Mesh(
+    new THREE.BoxGeometry(0.12, 0.12, 0.035),
+    gold
+  )
 
   chair.position.y = 0.45
   body.position.y = 1.25
+  shirt.position.set(0, 1.28, 0.3)
+  tie.position.set(0, 1.18, 0.34)
   head.position.y = 2.02
   hair.position.y = 2.35
+  hairRise.position.set(0, 2.52, -0.04)
   cup.position.set(0.55, 1.35, 0.2)
-  group.add(chair, body, head, hair, cup)
+  flagPin.position.set(0.26, 1.48, 0.34)
+  badgePin.position.set(0.29, 1.28, 0.34)
+
+  for (const x of [-0.14, 0.14]) {
+    const eye = new THREE.Mesh(
+      new THREE.BoxGeometry(0.06, 0.055, 0.02),
+      dark
+    )
+    const brow = new THREE.Mesh(
+      new THREE.BoxGeometry(0.12, 0.025, 0.02),
+      makeMaterial(0xded7ca, 0.7)
+    )
+
+    eye.position.set(x, 2.05, 0.31)
+    brow.position.set(x, 2.15, 0.32)
+    group.add(eye, brow)
+  }
+
+  for (const x of [-0.34, 0.34]) {
+    const earpiece = new THREE.Mesh(
+      new THREE.BoxGeometry(0.06, 0.14, 0.05),
+      gold
+    )
+
+    earpiece.position.set(x, 2.02, 0.03)
+    group.add(earpiece)
+  }
+
+  for (const y of [2.21, 2.27, 2.33]) {
+    const wrinkle = new THREE.Mesh(
+      new THREE.BoxGeometry(0.28, 0.014, 0.016),
+      makeMaterial(0xa7745f, 0.7)
+    )
+
+    wrinkle.position.set(0, y, 0.32)
+    group.add(wrinkle)
+  }
+
+  group.add(chair, body, shirt, tie, head, hair, hairRise, cup, flagPin, badgePin)
   group.position.set(112, 0, -95)
 
   return group
@@ -254,21 +356,63 @@ function createRR() {
     makeMaterial(0xfff0d0, 0.42, 0xffaa55, 0.3)
   )
   const shelly = new THREE.Group()
+  const uniform = makeMaterial(0x79d7dc, 0.58)
+  const uniformDark = makeMaterial(0x3baeb8, 0.65)
+  const white = makeMaterial(0xf7f2e7, 0.46)
+  const skin = makeMaterial(0xffc39c, 0.62)
+  const hairMaterial = makeMaterial(0x9b5a34, 0.82)
   const body = new THREE.Mesh(
     new THREE.BoxGeometry(0.75, 1.2, 0.5),
-    makeMaterial(0xf4d7d2, 0.65)
+    uniform
   )
   const head = new THREE.Mesh(
     new THREE.BoxGeometry(0.5, 0.5, 0.5),
-    makeMaterial(0xffc39c, 0.62)
+    skin
   )
   const hair = new THREE.Mesh(
-    new THREE.BoxGeometry(0.56, 0.24, 0.52),
-    makeMaterial(0x5b2d13, 0.86)
+    new THREE.BoxGeometry(0.62, 0.18, 0.52),
+    hairMaterial
+  )
+  const hairSweep = new THREE.Mesh(
+    new THREE.BoxGeometry(0.34, 0.2, 0.2),
+    hairMaterial
+  )
+  const ponytail = new THREE.Mesh(
+    new THREE.BoxGeometry(0.18, 0.65, 0.16),
+    hairMaterial
+  )
+  const collarLeft = new THREE.Mesh(
+    new THREE.BoxGeometry(0.18, 0.08, 0.05),
+    white
+  )
+  const collarRight = collarLeft.clone()
+  const pocketLeft = new THREE.Mesh(
+    new THREE.BoxGeometry(0.16, 0.26, 0.04),
+    white
+  )
+  const pocketRight = pocketLeft.clone()
+  const sleeveLeft = new THREE.Mesh(
+    new THREE.BoxGeometry(0.24, 0.18, 0.48),
+    uniformDark
+  )
+  const sleeveRight = sleeveLeft.clone()
+  const trimLeft = new THREE.Mesh(
+    new THREE.BoxGeometry(0.27, 0.045, 0.5),
+    white
+  )
+  const trimRight = trimLeft.clone()
+  const buttonTop = new THREE.Mesh(
+    new THREE.BoxGeometry(0.06, 0.06, 0.025),
+    white
+  )
+  const buttonBottom = buttonTop.clone()
+  const mouth = new THREE.Mesh(
+    new THREE.BoxGeometry(0.15, 0.025, 0.018),
+    makeMaterial(0xb8483b, 0.62)
   )
   const coffee = new THREE.Mesh(
     new THREE.BoxGeometry(0.22, 0.22, 0.18),
-    makeMaterial(0xf7f3e8, 0.4)
+    white
   )
 
   building.position.y = 2.5
@@ -277,8 +421,57 @@ function createRR() {
   body.position.y = 1.1
   head.position.y = 1.95
   hair.position.y = 2.24
+  hairSweep.position.set(0.12, 2.36, 0.14)
+  ponytail.position.set(0.22, 1.74, -0.3)
+  collarLeft.position.set(-0.12, 1.73, 0.28)
+  collarLeft.rotation.z = -0.25
+  collarRight.position.set(0.12, 1.73, 0.28)
+  collarRight.rotation.z = 0.25
+  pocketLeft.position.set(-0.18, 1.28, 0.28)
+  pocketRight.position.set(0.18, 1.28, 0.28)
+  sleeveLeft.position.set(-0.5, 1.32, 0)
+  sleeveRight.position.set(0.5, 1.32, 0)
+  trimLeft.position.set(-0.5, 1.2, 0)
+  trimRight.position.set(0.5, 1.2, 0)
+  buttonTop.position.set(0, 1.42, 0.29)
+  buttonBottom.position.set(0, 1.16, 0.29)
+  mouth.position.set(0, 1.84, 0.27)
   coffee.position.set(0.55, 1.25, 0.15)
-  shelly.add(body, head, hair, coffee)
+
+  for (const x of [-0.11, 0.11]) {
+    const eye = new THREE.Mesh(
+      new THREE.BoxGeometry(0.055, 0.055, 0.018),
+      makeMaterial(0x070303, 0.45)
+    )
+    const earring = new THREE.Mesh(
+      new THREE.BoxGeometry(0.035, 0.12, 0.025),
+      makeMaterial(0xd8c073, 0.36, 0x4b3608, 0.15)
+    )
+
+    eye.position.set(x, 1.99, 0.27)
+    earring.position.set(x < 0 ? -0.28 : 0.28, 1.92, 0.02)
+    shelly.add(eye, earring)
+  }
+
+  shelly.add(
+    body,
+    head,
+    hair,
+    hairSweep,
+    ponytail,
+    collarLeft,
+    collarRight,
+    pocketLeft,
+    pocketRight,
+    sleeveLeft,
+    sleeveRight,
+    trimLeft,
+    trimRight,
+    buttonTop,
+    buttonBottom,
+    mouth,
+    coffee
+  )
   shelly.position.set(0, 0, 5.5)
   group.add(building, roof, sign, shelly)
   group.position.set(142, 0, -105)

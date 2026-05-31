@@ -168,6 +168,21 @@ function addFace(
   if (style === 'cooper' || style === 'oneArmedMan') {
     addPixel(group, 0x2a1710, [0.2, 2.36, 0.305], [0.05, 0.028, 0.012], 0.8)
   }
+
+  if (style === 'oneArmedMan') {
+    addPixel(group, 0x4b3428, [-0.08, 2.06, 0.307], [0.09, 0.08, 0.014], 0.8)
+    addPixel(group, 0x4b3428, [0.08, 2.06, 0.307], [0.09, 0.08, 0.014], 0.8)
+    addPixel(group, 0x4b3428, [0, 2.0, 0.31], [0.18, 0.05, 0.014], 0.8)
+  }
+
+  if (style === 'cooper') {
+    addPixel(group, 0xd08b72, [0, 2.12, 0.308], [0.18, 0.025, 0.014], 0.72)
+  }
+
+  if (style === 'arm') {
+    addPixel(group, 0xa05f4c, [-0.1, 2.39, 0.306], [0.1, 0.022, 0.014], 0.8)
+    addPixel(group, 0xa05f4c, [0.1, 2.39, 0.306], [0.1, 0.022, 0.014], 0.8)
+  }
 }
 
 function addHairDetails(
@@ -216,27 +231,41 @@ function addHairDetails(
 
   if (style === 'oneArmedMan') {
     const darkHair = new THREE.Mesh(
-      new THREE.BoxGeometry(0.54, 0.18, 0.5),
+      new THREE.BoxGeometry(0.58, 0.2, 0.52),
       hairMaterial
     )
+    const recedeLeft = new THREE.Mesh(
+      new THREE.BoxGeometry(0.12, 0.16, 0.2),
+      hairMaterial
+    )
+    const recedeRight = recedeLeft.clone()
 
     darkHair.position.set(0, 2.48, -0.02)
-    group.add(darkHair)
+    recedeLeft.position.set(-0.23, 2.38, 0.12)
+    recedeRight.position.set(0.23, 2.38, 0.12)
+    group.add(darkHair, recedeLeft, recedeRight)
   }
 
   if (style === 'arm') {
     const top = new THREE.Mesh(
-      new THREE.BoxGeometry(0.54, 0.16, 0.5),
+      new THREE.BoxGeometry(0.6, 0.16, 0.52),
       hairMaterial
     )
     const front = new THREE.Mesh(
-      new THREE.BoxGeometry(0.46, 0.18, 0.1),
+      new THREE.BoxGeometry(0.5, 0.16, 0.1),
       hairMaterial
     )
+    const sideLeft = new THREE.Mesh(
+      new THREE.BoxGeometry(0.08, 0.24, 0.18),
+      hairMaterial
+    )
+    const sideRight = sideLeft.clone()
 
-    top.position.set(0, 2.5, -0.02)
-    front.position.set(0, 2.42, 0.25)
-    group.add(top, front)
+    top.position.set(0, 2.52, -0.02)
+    front.position.set(0, 2.44, 0.24)
+    sideLeft.position.set(-0.3, 2.34, 0.04)
+    sideRight.position.set(0.3, 2.34, 0.04)
+    group.add(top, front, sideLeft, sideRight)
   }
 
   if (style === 'cooper') {
@@ -297,7 +326,7 @@ function addOutfitDetails(
     addPixel(group, 0x050506, [0.22, 0.16, 0.08], [0.24, 0.16, 0.34], 0.72)
   }
 
-  if (style === 'oneArmedMan' || style === 'cooper') {
+  if (style === 'cooper') {
     const shirt = new THREE.Mesh(
       new THREE.BoxGeometry(0.34, 0.82, 0.045),
       makeMaterial(0xe9ded0, 0.5)
@@ -307,7 +336,7 @@ function addOutfitDetails(
 
     const tie = new THREE.Mesh(
       new THREE.BoxGeometry(0.08, 0.72, 0.055),
-      makeMaterial(style === 'oneArmedMan' ? 0x5a1111 : 0x080808, 0.65)
+      makeMaterial(0x080808, 0.65)
     )
 
     tie.position.set(0, 1.46, 0.39)
@@ -317,6 +346,34 @@ function addOutfitDetails(
     for (const y of [1.78, 1.58, 1.38]) {
       addPixel(group, 0xf6f0e6, [0, y, 0.42], [0.04, 0.04, 0.025], 0.45)
     }
+  }
+
+  if (style === 'oneArmedMan') {
+    const jacket = makeMaterial(0x4b4033, 0.86)
+    const turtleneck = makeMaterial(0x070707, 0.72)
+
+    const chest = new THREE.Mesh(
+      new THREE.BoxGeometry(0.48, 0.88, 0.06),
+      turtleneck
+    )
+
+    chest.position.set(0, 1.5, 0.42)
+
+    for (const x of [-0.22, 0.22]) {
+      const coatPanel = new THREE.Mesh(
+        new THREE.BoxGeometry(0.18, 0.95, 0.055),
+        jacket
+      )
+
+      coatPanel.position.set(x, 1.42, 0.43)
+      coatPanel.rotation.z = x < 0 ? -0.07 : 0.07
+      group.add(coatPanel)
+    }
+
+    addPixel(group, 0x766452, [-0.28, 1.78, 0.45], [0.08, 0.08, 0.03], 0.72)
+    addPixel(group, 0x766452, [-0.24, 1.42, 0.45], [0.06, 0.06, 0.03], 0.72)
+    addPixel(group, 0x0b0b0b, [0, 1.94, 0.45], [0.34, 0.12, 0.035], 0.72)
+    group.add(chest)
   }
 
   if (style === 'giant') {
@@ -396,11 +453,13 @@ function addOutfitDetails(
     addPixel(group, 0xf8d048, [-0.28, 1.72, 0.43], [0.09, 0.09, 0.03], 0.35)
     addPixel(group, 0x050505, [0, 1.98, 0.43], [0.16, 0.04, 0.03], 0.55)
     addPixel(group, 0xf3efe4, [0.73, 1.38, 0.15], [0.035, 0.11, 0.035], 0.35)
+    addPixel(group, 0xffffff, [-0.11, 1.94, 0.43], [0.12, 0.08, 0.03], 0.45)
+    addPixel(group, 0xffffff, [0.11, 1.94, 0.43], [0.12, 0.08, 0.03], 0.45)
   }
 
   if (style === 'arm') {
-    const lapels = makeMaterial(0x5a0304, 0.75)
-    const bowtie = makeMaterial(0x080303, 0.6)
+    const lapels = makeMaterial(0x8b0508, 0.75)
+    const shirt = makeMaterial(0xd91a1f, 0.64)
 
     for (const x of [-0.12, 0.12]) {
       const lapel = new THREE.Mesh(
@@ -413,14 +472,15 @@ function addOutfitDetails(
       group.add(lapel)
     }
 
-    const tie = new THREE.Mesh(
-      new THREE.BoxGeometry(0.22, 0.08, 0.055),
-      bowtie
+    const shirtFront = new THREE.Mesh(
+      new THREE.BoxGeometry(0.34, 0.72, 0.055),
+      shirt
     )
 
-    tie.position.set(0, 1.98, 0.39)
-    group.add(tie)
+    shirtFront.position.set(0, 1.56, 0.39)
+    group.add(shirtFront)
 
+    addPixel(group, 0xff8a8a, [0, 1.92, 0.43], [0.28, 0.08, 0.03], 0.6)
     addPixel(group, 0xff1d1d, [0, 1.26, 0.42], [0.08, 0.08, 0.03], 0.65)
     addPixel(group, 0x2a0303, [-0.22, 1.45, 0.41], [0.05, 0.32, 0.03], 0.8)
     addPixel(group, 0x2a0303, [0.22, 1.45, 0.41], [0.05, 0.32, 0.03], 0.8)
@@ -449,6 +509,8 @@ function addHandsAndShoes(
 
   if (config.style === 'oneArmedMan') {
     addPixel(group, 0x1b1714, [-0.44, 1.52, 0.04], [0.12, 0.34, 0.12], 0.78)
+    addPixel(group, skin, [0.52, 1.75, 0.25], [0.14, 0.14, 0.12], 0.62)
+    addPixel(group, skin, [0.54, 1.92, 0.32], [0.06, 0.18, 0.06], 0.62)
   }
 }
 
@@ -684,8 +746,8 @@ export function createCharacters(
     createCharacter({
       id: 'oneArmedMan',
       name: 'One Armed Man',
-      bodyColor: 0x2f2b24,
-      hairColor: 0x21110b,
+      bodyColor: 0x4b4033,
+      hairColor: 0x5a4639,
       skinColor: 0xd6aa84,
       style: 'oneArmedMan',
       missingLeftArm: true,
@@ -724,7 +786,7 @@ export function createCharacters(
     createCharacter({
       id: 'arm',
       name: 'The Arm',
-      bodyColor: 0xb90e12,
+      bodyColor: 0xc80b11,
       hairColor: 0xe6c475,
       skinColor: 0xf0bf9c,
       style: 'arm',
